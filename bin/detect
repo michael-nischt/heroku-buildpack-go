@@ -2,6 +2,8 @@
 # bin/detect <build-dir>
 set -e
 
+build=$(cd "$1/" && pwd)
+
 # test if .gopath file exists
 if ! (test -f $build/.gopath)
 then
