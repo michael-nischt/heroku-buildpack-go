@@ -4,12 +4,16 @@ set -e
 
 # test if .gopath file exists
 if ! (test -f $build/.gopath)
-then exit 1
+then
+  echo "No .gopath file found in root folder"
+  exit 1
 fi
 
 # test if there are any go files
 if ! (test -n "$(find "$1" -type f -name '*.go' | sed 1q)")
-then exit 1
+then
+  echo "No .go files file found"
+  exit 1
 fi
 
 exit 0
