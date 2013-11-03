@@ -2,7 +2,14 @@
 # bin/detect <build-dir>
 set -e
 
-if test -n "$(find "$1" -type f -name '*.go' | sed 1q)"
-then echo Go
-else echo no; exit 1
+# test if .gopath file exists
+if ! (test -f $build/.gopath)
+then exit 1
 fi
+
+# test if there are any go files
+if ! (test -n "$(find "$1" -type f -name '*.go' | sed 1q)")
+then exit 1
+fi
+
+exit 0

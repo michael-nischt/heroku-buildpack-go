@@ -38,32 +38,23 @@ virtualenv() {
     python "$buildpack/vendor/virtualenv-1.7/virtualenv.py" "$@"
 }
 
-if test -f $build/Godeps
+
+if test -f $build/.gover
 then
-    name=$(<$build/Godeps jq -r .ImportPath)
-    ver=$(<$build/Godeps jq -r .GoVersion)
-elif test -d $build/Godeps
+    GOVERSION=$(cat $build/.gover)
+fi
+ver=go${GOVERSION:-1.1.2}
+
+if test -f $build/.gopath
 then
-    name=$(<$build/Godeps/Godeps.json jq -r .ImportPath)
-    ver=$(<$build/Godeps/Godeps.json jq -r .GoVersion)
-elif test -f $build/.godir
-then
-    name=$(cat $build/.godir)
-    ver=go${GOVERSION:-1.1.2}
+    GOPKGS=$(cat $build/.gopath)
 else
-    echo >&2 " !     A .godir is required. For instructions:"
-    echo >&2 " !     http://mmcgrana.github.io/2012/09/getting-started-with-go-on-heroku"
-    exit 1
+    echo >&2 " !     A .gopath file containing the apps GOPATH is required."
+    exit 1    
 fi
 
 file=${GOFILE:-$ver.$(uname|tr A-Z a-z)-amd64$(platext $ver).tar.gz}
 url=${GOURL:-http://go.googlecode.com/files/$file}
-
-if test -e $build/bin && ! test -d $build/bin
-then
-    echo >&2 " !     File bin exists and is not a directory."
-    exit 1
-fi
 
 if test -d $cache/$ver/go
 then
@@ -79,19 +70,8 @@ else
     echo " done"
 fi
 
-GOROOT=$cache/$ver/go export GOROOT
-GOPATH=$build/.heroku/g export GOPATH
-PATH=$GOROOT/bin:$PATH
-
-
-if ! (test -d $build/Godeps || (which hg >/dev/null && which bzr >/dev/null))
+if ! (which hg >/dev/null && which bzr >/dev/null)
 then
-    echo
-    echo "       Tired of waiting for bzr and hg?"
-    echo "       Try godep save -copy"
-    echo "       See https://github.com/kr/godep for more info."
-    echo
-
     echo -n "       Installing Virtualenv..."
     virtualenv --python $python --distribute --never-download --prompt='(venv) ' $venv > /dev/null 2>&1
     . $venv/bin/activate > /dev/null 2>&1
@@ -106,21 +86,29 @@ then
     echo " done"
 fi
 
-p=$GOPATH/src/$name
-mkdir -p $p
-cp -R $build/* $p
+
+GOROOT=$cache/$ver/go export GOROOT
+PATH=$GOROOT/bin:$PATH
+GOPATH=$build/.heroku/go export GOPATH
+
+mkdir -p $GOPATH/src
+arr=$(echo $GOPKGS | tr ":" "\n")
+for x in $arr
+do
+    cp -r $build/$x/src/* $GOPATH/src/
+done
 
 unset GIT_DIR # unset git dir or it will mess with goinstall
-cd $p
-if test -e $build/Godeps
-then
-    echo "-----> Running: godep go install -tags heroku ./..."
-    godep go install -tags heroku ./...
-else
-    echo "-----> Running: go get -tags heroku ./..."
-    go get -tags heroku ./...
-fi
+cd $GOPATH
+echo "-----> Running: go get -tags heroku ..."
+go get -tags heroku ...
 
+
+if test -e $build/bin && ! test -d $build/bin
+then
+    echo >&2 " !     File bin exists and is not a directory."
+    exit 1
+fi
 mkdir -p $build/bin
 mv $GOPATH/bin/* $build/bin
 rm -rf $build/.heroku
