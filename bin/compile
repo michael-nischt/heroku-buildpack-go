@@ -11,7 +11,7 @@ set -eo pipefail
 # for testing on Darwin systems.
 platext() {
     case $1 in
-    go1.0*|go1.1|go1.1.*) return ;;
+    go1.0*|go1.1|go1.1.*|go1.2|go1.2.*) return ;;
     esac
     case $(uname|tr A-Z a-z) in
     darwin) printf %s -osx10.8 ;;
@@ -43,7 +43,7 @@ if test -f $build/.gover
 then
     GOVERSION=$(cat $build/.gover)
 fi
-ver=go${GOVERSION:-1.1.2}
+ver=go${GOVERSION:-1.2}
 
 if test -f $build/.gopath
 then
