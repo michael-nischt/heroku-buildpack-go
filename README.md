@@ -4,7 +4,7 @@ This is a [Heroku buildpack][buildpack] for [Go][go].
 
 Place a .gopath file in the root directory containing the GOPATH (relative to the root).
 All binaries will be copied to the bin/ which can then be referred from the Profile.
-Optionally, place a .gover file containing the desired go version. The default is '1.2'.
+Optionally, place a .gover file containing the desired go version. The default is '1.2.1'.
 
 
 The buildpack adds a `heroku` [build constraint][build-constraint],
