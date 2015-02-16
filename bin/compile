@@ -60,14 +60,14 @@ if test -f $build/.gover
 then
     GOVERSION=$(cat $build/.gover)
 fi
-ver=go${GOVERSION:-1.4}
+ver=go${GOVERSION:-1.4.1}
 
 if test -f $build/.gopath
 then
     GOPKGS=$(cat $build/.gopath)
 else
     echo >&2 " !     A .gopath file containing the apps GOPATH is required."
-    exit 1    
+    exit 1
 fi
 
 file=${GOFILE:-$ver.$(uname|tr A-Z a-z)-amd64$(platext $ver).tar.gz}
