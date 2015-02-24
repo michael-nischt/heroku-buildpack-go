@@ -60,7 +60,7 @@ if test -f $build/.gover
 then
     GOVERSION=$(cat $build/.gover)
 fi
-ver=go${GOVERSION:-1.4.1}
+ver=go${GOVERSION:-1.4.2}
 
 if test -f $build/.gopath
 then
