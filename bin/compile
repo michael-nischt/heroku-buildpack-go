@@ -11,7 +11,7 @@ set -eo pipefail
 # for testing on Darwin systems.
 platext() {
     case $1 in
-    go1.0*|go1.1|go1.1.*|go1.2|go1.2.*|go1.3|go1.3.*|go1.4|go1.4.*) return ;;
+    go1.0*|go1.1beta*|go1.1rc*|go1.1|go1.1.*) return ;;
     esac
     case $(uname|tr A-Z a-z) in
     darwin) printf %s -osx10.8 ;;
@@ -85,6 +85,7 @@ else
     tar zxf $file
     rm -f $file
     echo " done"
+    cd - >/dev/null
 fi
 
 if ! (which hg >/dev/null && which bzr >/dev/null)
@@ -103,10 +104,17 @@ then
     echo " done"
 fi
 
+if test -e $build/bin && ! test -d $build/bin
+then
+    echo >&2 " !     File bin exists and is not a directory."
+    exit 1
+fi
+mkdir -p $build/bin
 
+GOBIN=$build/bin export GOBIN
 GOROOT=$cache/$ver/go export GOROOT
-PATH=$GOROOT/bin:$PATH
 GOPATH=$build/.heroku/go export GOPATH
+PATH=$GOROOT/bin:$PATH
 
 mkdir -p $GOPATH/src
 arr=$(echo $GOPKGS | tr ":" "\n")
@@ -121,13 +129,7 @@ echo "-----> Running: go get -tags heroku ..."
 go get -tags heroku ...
 
 
-if test -e $build/bin && ! test -d $build/bin
-then
-    echo >&2 " !     File bin exists and is not a directory."
-    exit 1
-fi
-mkdir -p $build/bin
-mv $GOPATH/bin/* $build/bin
+#mv $GOPATH/bin/* $build/bin
 rm -rf $build/.heroku
 
 mkdir -p $build/.profile.d
