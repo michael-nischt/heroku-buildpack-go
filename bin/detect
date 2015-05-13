@@ -2,10 +2,8 @@
 # bin/detect <build-dir>
 set -e
 
-build=$(cd "$1/" && pwd)
-
 # test if .gopath file exists
-if ! (test -f $build/.gopath)
+if ! (test -f "$1/.gopath")
 then
   echo "No .gopath file found in root folder"
   exit 1
@@ -18,4 +16,5 @@ then
   exit 1
 fi
 
+echo ".gopath buildpack"
 exit 0
